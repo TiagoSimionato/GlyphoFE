@@ -1,0 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700&family=Raleway:wght@600&display=swap');
+
+* {
+  border: 0;
+  color: white;
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+}
+
+:root {
+  --headerPadding: 10px;
+  --headerHeight : 38px;
+
+  --codeLineHeight  : 20px;
+  --lineCounterWidth: 30px;
+
+  --footerPadding: 5px;
+  --footerHeight : 18px:
+}
+
+body {
+  background-color: black;
+  color: white;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12pt;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+***********************************
+HEADER
+***********************************
+*/
+
+header {
+  padding: var(--headerPadding);
+}
+
+.compilerTitle {
+  text-align: center;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.secContainer {
+  border-bottom: 1px solid white;
+  border-top: 1px solid white;
+  display: flex;
+  width: 100%;
+  flex-grow: 1;
+}
+
+/*
+***********************************
+MENU SECTION
+***********************************
+*/
+
+.menu {
+  display: inline-flex;
+  height: 100%;
+  padding: 5px;
+}
+
+.playButton {
+  background: none;
+  width: 50px;
+  height: 50px;
+  border: solid 5px #fff;
+  border-radius: 100%;
+  position: relative; 
+  text-indent:-9999px;
+  box-shadow: 1px 1px 3px #999999;
+}
+
+.playButton span {
+  width: 0;
+  height: 0;
+  border-top: 15px solid transparent;
+  border-left: 20px solid #fff;
+  border-bottom: 15px solid transparent;
+  position:absolute;
+  top:20%;
+  left:36%;    
+}
+
+.playButton:hover{
+  background:#4ccaea;
+  cursor:pointer;
+  opacity:0.8;
+  border:none;
+  width: 60px;
+  height: 60px; 
+  box-shadow:none;
+}
+
+.playButton:hover span{
+  top:25%;
+  left:38%;
+}
+
+/*
+***********************************
+INPUT SECTION
+***********************************
+*/
+
+.inputSection {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.inputBox {
+  width: 100%;
+  height: 100%;
+}
+
+.codeBox {
+  background-color: black;
+  display: flex;
+  flex-grow: 1;
+  max-height: calc();
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.lineCounter {
+  background-color: black;
+  border-right: 1px solid white;
+  border-left: 1px solid white;
+  display: inline-flex;
+  flex-direction: column;
+min-height: fit-content;
+  margin: 0;
+  text-align: center;
+  width: var(--lineCounterWidth);
+}
+
+li {
+  height: var(--codeLineHeight);
+  line-height: var(--codeLineHeight);
+  font-style: normal;
+  list-style: none;
+}
+
+.codeInput {
+  display: inline;
+  height: 100%;
+  line-height: var(--codeLineHeight);
+  padding-left: 1px;
+  
+  flex-grow: 1;
+
+  background-color: black;
+  font-family: inherit;
+  font-size: inherit;
+  overflow: hidden;
+  caret-color: white;
+}
+
+/*
+***********************************
+CONSOLE SECTION
+***********************************
+*/
+
+.console {
+  border-top: 1px solid white;
+  border-left: 1px solid white;
+  border-top: 1px solid white;
+
+  display: none;
+  height: 30vh;
+
+  overflow-y: auto;
+}
+
+.consoleLabel {
+  border-right: 1px solid white;
+  display: flex;
+  max-width: fit-content;
+  padding-left: 5px;
+}
+
+.consoleLabel span {
+  line-height: 32px;
+}
+
+.consoleClose {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  opacity: 0.6;
+  position: relative;
+  cursor:pointer;
+
+}
+
+.consoleClose:hover {
+  opacity: 1;
+}
+
+.consoleClose::before, .consoleClose::after {
+  position: absolute;
+  content: '';
+  height: 15px;
+  width: 2px;
+  left: 16px;
+  top: 8px;
+  background-color: white;
+}
+
+.consoleClose::before {
+  transform: rotate(45deg);
+}
+
+.consoleClose::after {
+  transform: rotate(-45deg);
+}
+
+.consoleContent {
+  border-top: 1px solid white;
+}
+
+/*FOOTER*/
+
+footer {
+  background-color: gray;
+  text-align: center;
+  padding: var(--footerPadding);
+}
