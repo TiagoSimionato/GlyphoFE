@@ -1,12 +1,13 @@
-const codeInput    = document.querySelector('.codeInput');
-const codeBox      = document.querySelector('.codeBox');
-const lineCounter  = document.querySelector('.lineCounter');
-const playButton   = document.querySelector('.playButton');
-const console      = document.querySelector('.console');
-const consoleClose = document.querySelector('.consoleClose');
-const sourceCode   = localStorage.getItem('sourceCode') || '';
-const consoleOpen  = localStorage.getItem('consoleOpen') || false;
-var lineCount = 1
+const codeInput      = document.querySelector('.codeInput');
+const codeBox        = document.querySelector('.codeBox');
+const lineCounter    = document.querySelector('.lineCounter');
+const playButton     = document.querySelector('.playButton');
+const consoleElement = document.querySelector('.console');
+const consoleContent = document.querySelector('.consoleContent');
+const consoleClose   = document.querySelector('.consoleClose');
+const sourceCode     = localStorage.getItem('sourceCode') || '';
+let consoleOpen      = JSON.parse(localStorage.getItem('consoleOpen')).value || false;
+let lineCount = 1
 
 loadSourceCode();
 fixLines();
@@ -15,14 +16,14 @@ if (consoleOpen) {
 }
 
 //Cada alteração que o usuário fizer no código, ajusto a contagem de linhas e guardo o código fonte no navegador
-codeInput.addEventListener("keydown", function(event) {
+codeInput.addEventListener("keydown", event => {
   if (event.keyCode === 13) { //Enter
     appendLine();
   }
   storeSourceCode();
 });
 
-codeInput.addEventListener("keyup", function(event) {
+codeInput.addEventListener("keyup", event => {
   if (event.keyCode === 8) { //Backspace
     fixLines();
   }
@@ -30,13 +31,35 @@ codeInput.addEventListener("keyup", function(event) {
 });
 
 //Ao clicar no botão de play, será enviado o código fonte para compilação e o console do editor mostrará os resultados
-playButton.addEventListener("click", function(event) {
-  openConsole();
-
+playButton.addEventListener("click", async function(event) {  
   //TODO FECTH
+  consoleContent.innerHTML = 'Loading'
+  try {
+    const response = await fetch("http://localhost:8080/compile", {
+      method: 'GET',
+      mode: 'cors',
+      cache: "no-cache",
+      credentials: 'omit',
+      headers: {
+        "Content-Type": "application/json",
+        "code": JSON.stringify(codeInput.value),
+      },
+      redirect: "follow",
+      referrerPolicy: "no-referrer",
+    })
+    .then(response => response.json())
+
+    consoleContent.innerHTML = response.result;
+    openConsole();
+  } catch (error) {
+    consoleContent.innerHTML = "Unable to fetch compilation. " + error;
+    openConsole();
+  }
+  
+  console.log(response);
 });
 
-consoleClose.addEventListener("click", function(event) {
+consoleClose.addEventListener("click", (event) => {
   closeConsole();
 });
 
@@ -86,13 +109,13 @@ function storeSourceCode() {
 }
 
 function openConsole() {
-  console.style.display = "block";
-
-  localStorage.setItem('consoleOpen', true);
+  consoleElement.style.display = "block";
+  consoleOpen = true;
+  localStorage.setItem('consoleOpen', JSON.stringify({'value': true}));
 }
 
 function closeConsole() {
-  console.style.display = "none";
-
-  localStorage.setItem('consoleOpen', false);
+  consoleElement.style.display = "none";
+  consoleOpen = false;
+  localStorage.setItem('consoleOpen', JSON.stringify({'value': false}));
 }
