@@ -33,7 +33,7 @@ codeInput.addEventListener("keyup", event => {
 //Ao clicar no botão de play, será enviado o código fonte para compilação e o console do editor mostrará os resultados
 playButton.addEventListener("click", async function(event) {  
   //TODO FECTH
-  consoleContent.innerHTML = 'Loading'
+  consoleContent.innerHTML = 'Loading';
   try {
     const response = await fetch("http://localhost:8080/compile", {
       method: 'GET',
@@ -49,14 +49,16 @@ playButton.addEventListener("click", async function(event) {
     })
     .then(response => response.json())
 
-    consoleContent.innerHTML = response.result;
+    consoleContent.innerHTML = response.result.replace(/[\n]/g, "<br>")
+      + '<br>'
+      + response.targetCode.replace(/[\n]/g, "<br>");
     openConsole();
+    console.log(response);
   } catch (error) {
     consoleContent.innerHTML = "Unable to fetch compilation. " + error;
     openConsole();
+    console.log(error);
   }
-  
-  console.log(response);
 });
 
 consoleClose.addEventListener("click", (event) => {
