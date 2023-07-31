@@ -174,8 +174,6 @@ CONSOLE SECTION
 
   display: none;
   height: 30vh;
-
-  overflow-y: auto;
 }
 
 .consoleLabel {
@@ -223,6 +221,10 @@ CONSOLE SECTION
 
 .consoleContent {
   border-top: 1px solid white;
+
+  overflow: auto;
+  max-height: 90%;
+  box-sizing: border-box;
 }
 
 /*FOOTER*/

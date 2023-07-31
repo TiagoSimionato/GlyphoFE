@@ -6,14 +6,20 @@ const consoleElement = document.querySelector('.console');
 const consoleContent = document.querySelector('.consoleContent');
 const consoleClose   = document.querySelector('.consoleClose');
 const sourceCode     = localStorage.getItem('sourceCode') || '';
-let consoleOpen      = JSON.parse(localStorage.getItem('consoleOpen')).value || false;
-let lineCount = 1
+const consoleOpen    = loadConsole();
+let lineCount        = 1;
 
 loadSourceCode();
 fixLines();
 if (consoleOpen) {
   openConsole();
 }
+
+/************************************************************************
+ ************************************************************************
+ * EVENT LISTENERS
+ ************************************************************************
+************************************************************************/
 
 //Cada alteração que o usuário fizer no código, ajusto a contagem de linhas e guardo o código fonte no navegador
 codeInput.addEventListener("keydown", event => {
@@ -65,6 +71,12 @@ consoleClose.addEventListener("click", (event) => {
   closeConsole();
 });
 
+/************************************************************************
+ ************************************************************************
+ * FUNCTIONS
+ ************************************************************************
+************************************************************************/
+
 //É necessário adicionar ou remover elementos do flex conforme o usuário vai editando
 function fixLines() {
   const codeString = codeInput.value;
@@ -99,6 +111,14 @@ function appendLine() {
   lineCounter.appendChild(li);
 }
 
+function loadConsole() {
+  const item = JSON.parse(localStorage.getItem('consoleOpen'));
+  if (item !== null) {
+    return item.value;
+  }
+  return false;
+}
+
 function loadSourceCode() {
   if (sourceCode) {
     codeInput.value = sourceCode;
@@ -112,12 +132,10 @@ function storeSourceCode() {
 
 function openConsole() {
   consoleElement.style.display = "block";
-  consoleOpen = true;
   localStorage.setItem('consoleOpen', JSON.stringify({'value': true}));
 }
 
 function closeConsole() {
   consoleElement.style.display = "none";
-  consoleOpen = false;
   localStorage.setItem('consoleOpen', JSON.stringify({'value': false}));
 }
