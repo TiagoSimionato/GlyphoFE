@@ -35,7 +35,7 @@ playButton.addEventListener("click", async function(event) {
   //TODO FECTH
   consoleContent.innerHTML = 'Loading';
   try {
-    const response = await fetch("//glyphobe-production.up.railway.app/compile", {
+    const response = await fetch("http://glyphobe-production.up.railway.app/compile", {
       method: 'GET',
       mode: 'cors',
       cache: "no-cache",
