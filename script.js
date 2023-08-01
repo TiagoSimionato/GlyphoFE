@@ -1,3 +1,4 @@
+const compilerName   = document.querySelector('#body');
 const codeInput      = document.querySelector('.codeInput');
 const codeBox        = document.querySelector('.codeBox');
 const lineCounter    = document.querySelector('.lineCounter');
@@ -5,15 +6,21 @@ const playButton     = document.querySelector('.playButton');
 const consoleElement = document.querySelector('.console');
 const consoleContent = document.querySelector('.consoleContent');
 const consoleClose   = document.querySelector('.consoleClose');
-const sourceCode     = localStorage.getItem('sourceCode') || '';
-const consoleOpen    = loadConsole();
+const sourceCode     = loadResource('sourceCode') || '';
+const consoleOpen    = loadResource('consoleOpen') || false;
+let fetchURL         = "https://glyphobe-production.up.railway.app/compile";
 let lineCount        = 1;
+
+/************************************************************************
+ ************************************************************************
+ * MAIN
+ ************************************************************************
+************************************************************************/
 
 loadSourceCode();
 fixLines();
-if (consoleOpen) {
-  openConsole();
-}
+loadResponse();
+if (consoleOpen) openConsole();
 
 /************************************************************************
  ************************************************************************
@@ -26,22 +33,22 @@ codeInput.addEventListener("keydown", event => {
   if (event.keyCode === 13) { //Enter
     appendLine();
   }
-  storeSourceCode();
+  storeResource('sourceCode', codeInput.value);
 });
 
 codeInput.addEventListener("keyup", event => {
   if (event.keyCode === 8) { //Backspace
     fixLines();
   }
-  storeSourceCode();
+  storeResource('sourceCode', codeInput.value);
 });
 
 //Ao clicar no botão de play, será enviado o código fonte para compilação e o console do editor mostrará os resultados
 playButton.addEventListener("click", async function(event) {  
-  //TODO FECTH
   consoleContent.innerHTML = 'Loading';
+
   try {
-    const response = await fetch("https://glyphobe-production.up.railway.app/compile", {
+    const response = await fetch(fetchURL, {
       method: 'GET',
       mode: 'cors',
       cache: "no-cache",
@@ -55,10 +62,14 @@ playButton.addEventListener("click", async function(event) {
     })
     .then(response => response.json())
 
-    consoleContent.innerHTML = response.result.replace(/[\n]/g, "<br>")
+    const responseDisplay = response.result.replace(/[\n]/g, "<br>")
       + '<br>'
-      + response.targetCode.replace(/[\n]/g, "<br>");
+      + response.targetCode.replace(/[\n]/g, "<br>")
+    ;
+    consoleContent.innerHTML = responseDisplay;
     openConsole();
+    storeResource('response', responseDisplay);
+
     console.log(response);
   } catch (error) {
     consoleContent.innerHTML = "Unable to fetch compilation. " + error;
@@ -67,8 +78,19 @@ playButton.addEventListener("click", async function(event) {
   }
 });
 
-consoleClose.addEventListener("click", (event) => {
+consoleClose.addEventListener("click", event => {
   closeConsole();
+});
+//Para propósitos de testes locais
+compilerName.addEventListener("keydown", event => {
+  if (event.target.className !== "codeInput" && event.keyCode === 110) {
+    if (fetchURL.match(/localhost/g)) {
+      fetchURL = "https://glyphobe-production.up.railway.app/compile";
+    } else {
+      fetchURL = "http://localhost:8080/compile";
+    }
+    console.log(fetchURL);
+  }
 });
 
 /************************************************************************
@@ -111,12 +133,12 @@ function appendLine() {
   lineCounter.appendChild(li);
 }
 
-function loadConsole() {
-  const item = JSON.parse(localStorage.getItem('consoleOpen'));
-  if (item !== null) {
-    return item.value;
-  }
-  return false;
+function loadResource(resourceName) {
+  return JSON.parse(localStorage.getItem(resourceName));
+}
+
+function storeResource(resourceName, value) {
+  localStorage.setItem(resourceName, JSON.stringify(value));
 }
 
 function loadSourceCode() {
@@ -125,17 +147,19 @@ function loadSourceCode() {
   }
 }
 
-function storeSourceCode() {
-  const code = codeInput.value;
-  localStorage.setItem('sourceCode', code);
+function loadResponse() {
+  const response = loadResource('response');
+  if (response) {
+    consoleContent.innerHTML = response;
+  }
 }
 
 function openConsole() {
   consoleElement.style.display = "block";
-  localStorage.setItem('consoleOpen', JSON.stringify({'value': true}));
+  localStorage.setItem('consoleOpen', true);
 }
 
 function closeConsole() {
   consoleElement.style.display = "none";
-  localStorage.setItem('consoleOpen', JSON.stringify({'value': false}));
+  localStorage.setItem('consoleOpen', false);
 }
