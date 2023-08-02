@@ -3,6 +3,7 @@ const codeInput      = document.querySelector('.codeInput');
 const codeBox        = document.querySelector('.codeBox');
 const lineCounter    = document.querySelector('.lineCounter');
 const playButton     = document.querySelector('.playButton');
+const langButton     = document.querySelector('.langButton');
 const consoleElement = document.querySelector('.console');
 const consoleContent = document.querySelector('.consoleContent');
 const consoleClose   = document.querySelector('.consoleClose');
@@ -10,6 +11,7 @@ const sourceCode     = loadResource('sourceCode') || '';
 const consoleOpen    = loadResource('consoleOpen') || false;
 let fetchURL         = "https://glyphobe-production.up.railway.app/compile";
 let lineCount        = 1;
+let targetLang       = 'js';
 
 /************************************************************************
  ************************************************************************
@@ -18,6 +20,7 @@ let lineCount        = 1;
 ************************************************************************/
 
 loadSourceCode();
+loadTargetLang();
 fixLines();
 loadResponse();
 if (consoleOpen) openConsole();
@@ -56,6 +59,7 @@ playButton.addEventListener("click", async function(event) {
       headers: {
         "Content-Type": "application/json",
         "code": JSON.stringify(codeInput.value),
+        "targetLang": JSON.stringify(targetLang),
       },
       redirect: "follow",
       referrerPolicy: "no-referrer",
@@ -81,6 +85,7 @@ playButton.addEventListener("click", async function(event) {
 consoleClose.addEventListener("click", event => {
   closeConsole();
 });
+
 //Para propósitos de testes locais
 compilerName.addEventListener("keydown", event => {
   if (event.target.className !== "codeInput" && event.keyCode === 110) {
@@ -90,6 +95,15 @@ compilerName.addEventListener("keydown", event => {
       fetchURL = "http://localhost:8080/compile";
     }
     console.log(fetchURL);
+  }
+});
+
+langButton.addEventListener("click", event => {
+  if (event.target.attributes.value != null) {
+    const langSelected = document.querySelector('#langSelected');
+    langSelected.innerText = event.target.innerText;
+    targetLang = event.target.attributes.value.value;
+    storeResource('targetLang', targetLang);
   }
 });
 
@@ -144,6 +158,15 @@ function storeResource(resourceName, value) {
 function loadSourceCode() {
   if (sourceCode) {
     codeInput.value = sourceCode;
+  }
+}
+
+function loadTargetLang() {
+  targetLang = loadResource('targetLang');
+  const selectedLang = document.querySelector('#langSelected');
+  const langItem = document.querySelector('#' + targetLang);
+  if (selectedLang && langItem) {
+    selectedLang.innerText = langItem.innerText;
   }
 }
 
