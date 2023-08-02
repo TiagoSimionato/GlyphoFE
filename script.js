@@ -1,4 +1,4 @@
-const compilerName   = document.querySelector('#body');
+const body   = document.querySelector('#body');
 const codeInput      = document.querySelector('.codeInput');
 const codeBox        = document.querySelector('.codeBox');
 const lineCounter    = document.querySelector('.lineCounter');
@@ -87,7 +87,7 @@ consoleClose.addEventListener("click", event => {
 });
 
 //Para propósitos de testes locais
-compilerName.addEventListener("keydown", event => {
+body.addEventListener("keydown", event => {
   if (event.target.className !== "codeInput" && event.keyCode === 110) {
     if (fetchURL.match(/localhost/g)) {
       fetchURL = "https://glyphobe-production.up.railway.app/compile";
@@ -96,14 +96,20 @@ compilerName.addEventListener("keydown", event => {
     }
     console.log(fetchURL);
   }
+  if (event.keyCode === 106) {
+    if (targetLang === 'js') {
+      changeLanguage('java');
+    } else if (targetLang === 'java') {
+      changeLanguage('py');
+    } else {
+      changeLanguage('js');
+    }
+  }
 });
 
 langButton.addEventListener("click", event => {
   if (event.target.attributes.value != null) {
-    const langSelected = document.querySelector('#langSelected');
-    langSelected.innerText = event.target.innerText;
-    targetLang = event.target.attributes.value.value;
-    storeResource('targetLang', targetLang);
+    changeLanguage(event.target.attributes.value.value);
   }
 });
 
@@ -145,6 +151,14 @@ function appendLine() {
   li.innerHTML = lineCount;
   li.id = 'li' + lineCount;
   lineCounter.appendChild(li);
+}
+
+function changeLanguage(lang) {
+  const langSelected = document.querySelector('#langSelected');
+  const langText     = document.querySelector('#' + lang);
+  langSelected.innerText = langText.innerText;
+  targetLang = lang;
+  storeResource('targetLang', targetLang);
 }
 
 function loadResource(resourceName) {
