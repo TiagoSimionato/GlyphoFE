@@ -1,4 +1,4 @@
-const body   = document.querySelector('#body');
+const body           = document.querySelector('#body');
 const codeInput      = document.querySelector('.codeInput');
 const codeBox        = document.querySelector('.codeBox');
 const lineCounter    = document.querySelector('.lineCounter');
@@ -66,15 +66,19 @@ playButton.addEventListener("click", async function(event) {
     })
     .then(response => response.json())
 
-    const responseDisplay = response.result.replace(/[\n]/g, "<br>")
-      + '<br>'
-      + response.targetCode.replace(/[\n]/g, "<br>")
+    const responseDisplay = response.result //Compilation Status
+      .replace(/[\n]/gm, "<br>")
+      + '<br>' +
+      response.targetCode
+      .replace(/[\n]/g, "<br>")
+      .replace(/[\s]/gm, "&nbsp;")
     ;
     consoleContent.innerHTML = responseDisplay;
     openConsole();
     storeResource('response', responseDisplay);
 
     console.log(response);
+    console.log(responseDisplay);
   } catch (error) {
     consoleContent.innerHTML = "Unable to fetch compilation. " + error;
     openConsole();
