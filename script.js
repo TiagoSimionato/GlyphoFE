@@ -7,7 +7,7 @@ const langButton     = document.querySelector('.langButton');
 const consoleElement = document.querySelector('.console');
 const consoleContent = document.querySelector('.consoleContent');
 const consoleClose   = document.querySelector('.consoleClose');
-const sourceCode     = loadResource('sourceCode') || '';
+const sourceCode     = loadResource('sourceCode')  || '';
 const consoleOpen    = loadResource('consoleOpen') || false;
 let fetchURL         = "https://glyphobe-production.up.railway.app/compile";
 let lineCount        = 1;
@@ -36,21 +36,27 @@ codeInput.addEventListener("keydown", event => {
   if (event.keyCode === 13) { //Enter
     appendLine();
   }
-  storeResource('sourceCode', codeInput.value);
+  storeResource('sourceCode', codeInput.innerHTML);
 });
 
 codeInput.addEventListener("keyup", event => {
   if (event.keyCode === 8) { //Backspace
     fixLines();
   }
-  storeResource('sourceCode', codeInput.value);
+  storeResource('sourceCode', codeInput.innerHTML);
 });
 
 //Ao clicar no botão de play, será enviado o código fonte para compilação e o console do editor mostrará os resultados
 playButton.addEventListener("click", async function(event) {  
   consoleContent.innerHTML = 'Loading';
 
+  const code = codeInput.innerHTML
+    .replace(/<div>/gm, "\n")
+    .replace(/(<\/div>)?(<br>)?/gm, "")
+  ;
+
   try {
+    //Fetch que manda o programa que está salvo no browser para o back end, que retorna para o front o status da compilação e o código
     const response = await fetch(fetchURL, {
       method: 'GET',
       mode: 'cors',
@@ -58,7 +64,7 @@ playButton.addEventListener("click", async function(event) {
       credentials: 'omit',
       headers: {
         "Content-Type": "application/json",
-        "code": JSON.stringify(codeInput.value),
+        "code": JSON.stringify(code),
         "targetLang": JSON.stringify(targetLang),
       },
       redirect: "follow",
@@ -66,6 +72,7 @@ playButton.addEventListener("click", async function(event) {
     })
     .then(response => response.json())
 
+    //É necessário substituir os espacos e as quebra de linha para que seja exibido corretamente a resposta
     const responseDisplay = response.result //Compilation Status
       .replace(/[\n]/gm, "<br>")
       + '<br>' +
@@ -78,7 +85,6 @@ playButton.addEventListener("click", async function(event) {
     storeResource('response', responseDisplay);
 
     console.log(response);
-    console.log(responseDisplay);
   } catch (error) {
     consoleContent.innerHTML = "Unable to fetch compilation. " + error;
     openConsole();
@@ -100,7 +106,7 @@ body.addEventListener("keydown", event => {
     }
     console.log(fetchURL);
   }
-  if (event.keyCode === 106) {
+  if (event.keyCode === 106) { //numpad *
     if (targetLang === 'js') {
       changeLanguage('java');
     } else if (targetLang === 'java') {
@@ -125,7 +131,8 @@ langButton.addEventListener("click", event => {
 
 //É necessário adicionar ou remover elementos do flex conforme o usuário vai editando
 function fixLines() {
-  const codeString = codeInput.value;
+  //input é salvo com div para separar as linhas
+  const codeString = codeInput.innerHTML.replace(/<div>/g, '\n');
 
   var lines = 1;
   //Conto quantas quebras de linha há no código fonte
@@ -135,6 +142,7 @@ function fixLines() {
     };
   }
 
+  //Ajusto o numero de linhas 
   if (lineCount > lines) {
     for (var i = lineCount; i > lines; i--) {
       const extraCounter = document.querySelector('#li' + i);
@@ -166,7 +174,13 @@ function changeLanguage(lang) {
 }
 
 function loadResource(resourceName) {
-  return JSON.parse(localStorage.getItem(resourceName));
+  const resource = localStorage.getItem(resourceName);
+  if (resource === "undefined") {
+    return "";
+  }
+  else {
+    return JSON.parse(resource);
+  }
 }
 
 function storeResource(resourceName, value) {
@@ -175,7 +189,7 @@ function storeResource(resourceName, value) {
 
 function loadSourceCode() {
   if (sourceCode) {
-    codeInput.value = sourceCode;
+    codeInput.innerHTML = sourceCode;
   }
 }
 
