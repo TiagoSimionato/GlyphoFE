@@ -13,15 +13,47 @@ let fetchURL         = "https://glyphobe-production.up.railway.app/compile";
 let lineCount        = 1;
 let targetLang       = 'js';
 
+/**SYNTAX HIGHLIGH PURPOSES */
+const tokenObjList = {
+  tokenModels: [
+    {
+      TOKENS: ["programa", "fimprog"],
+      tokenClass: "minprog"
+    },
+    {
+      TOKENS: ["INTEIRO", "REAL", "BOOLEANO"],
+      tokenClass: "dataType"
+    },
+    {
+      TOKENS: ["declare", "leia", "escreva", "se", "entao", "ou se", "senao", "enquanto"],
+      tokenClass: "reservedWords"
+    },
+    {
+      TOKENS: ["[0-9]+(\\.[0-9]+R?)?", "[0-9]+(\\.[0-9]+)?R"],
+      tokenClass: "numberLiteral"
+    },
+    {
+      TOKENS: ["VERDADEIRO", "FALSO"],
+      tokenClass: "booleanLiteral"
+    },
+    {
+      TOKENS: [`"[a-zA-Z0-9 \\t!-]*"`],
+      tokenClass: "textLiteral"
+    }
+  ],
+};
+
 /************************************************************************
  ************************************************************************
  * MAIN
  ************************************************************************
 ************************************************************************/
-
+ra = new RegExp(`(?<=\\s)INTEIRO(?=\\s)`, 'g');
+console.log(ra.exec("     <span> INTEIRO </span> "));
 loadSourceCode();
 loadTargetLang();
 fixLines();
+highlight(codeInput);
 loadResponse();
 if (consoleOpen) openConsole();
 
@@ -42,7 +74,9 @@ codeInput.addEventListener("keydown", event => {
 codeInput.addEventListener("keyup", event => {
   if (event.keyCode === 8) { //Backspace
     fixLines();
+  } else if (event.keyCode === 13) { //Enter
   }
+  highlight(codeInput);
   storeResource('sourceCode', codeInput.innerHTML);
 });
 
@@ -135,6 +169,8 @@ function fixLines() {
   const codeString = codeInput.innerHTML.replace(/<div>/g, '\n');
 
   var lines = 1;
+  if (codeString.charAt(0) === '\n') lines--; //Para não contar linha a mais
+
   //Conto quantas quebras de linha há no código fonte
   for (var i = 0; i < codeString.length; i++) {
     if (codeString[i] == '\n') {
@@ -217,4 +253,134 @@ function openConsole() {
 function closeConsole() {
   consoleElement.style.display = "none";
   localStorage.setItem('consoleOpen', false);
+}
+
+/**NOME DAS CLASSES NAO PODE SER IGUAL A NENHUM TOKEN */
+function highlight(codeHolder) {
+  let codeString = codeHolder.innerHTML;
+
+  const caretPos = getCaretPosition(codeHolder);
+
+  codeString = decolor(codeString);
+
+  tokenObjList.tokenModels.forEach((model) => {
+    codeString = color(codeString, model.TOKENS, model.tokenClass);
+  });
+
+  codeHolder.innerHTML = codeString;
+  setCaretPositon(caretPos, codeHolder);
+}
+
+function color(code, TOKENLIST, tokenClass) {
+  TOKENLIST.forEach((token) => {
+    //pequeno hardcode para algumas classes de token especificas serem aceitas com alguns caracteres a mais, i.e. escreva()
+    //porem sem colorir o parenteses!!
+    const parenthesis1 = (
+      tokenClass === "reservedWords"  |
+      tokenClass === "numberLiteral"  |
+      tokenClass === "booleanLiteral" |
+      tokenClass === "textLiteral"
+    ) ? '(?=\\()|' : '' ;
+    const parenthesis2 = (
+      tokenClass === "reservedWords"  |
+      tokenClass === "numberLiteral"  |
+      tokenClass === "booleanLiteral" |
+      tokenClass === "textLiteral"
+    ) ? '(?=\\))|' : '' ;
+    const dotcomma = (
+      tokenClass === "minprog"        |
+      tokenClass === "numberLiteral"  |
+      tokenClass === "booleanLiteral"
+    ) ? '(?=[\\.\\,])|' : '' ;
+
+    re = new RegExp(`(${parenthesis1.replace("?", "?<")}(?<=\\s)|(?<=<div>)|(?<=&nbsp;))(${token})(${parenthesis1 + parenthesis2 + dotcomma}(?=\\s)|(?=<\\/div>)|(?=&nbsp;))`, "gm");
+    code = code.replace(re, `<span class="${tokenClass}">$2</span>`);
+  });
+  return code;
+}
+
+function decolor(code) {
+    re = new RegExp("<span[^>]*>|<\\/span>", "gm");
+    return code.replace(re, '');
+}
+
+function getCaretPosition(element) {
+  var selection = window.getSelection(),
+    charCount = -1,
+    node;
+
+  if (selection.focusNode) {
+    if (isChild(selection.focusNode, element)) {
+      node = selection.focusNode;
+      charCount = selection.focusOffset;
+
+      while (node) {
+        if (node === element) break;
+
+        if (node.previousSibling) {
+          node = node.previousSibling;
+          charCount += node.textContent.length;
+        } else {
+          node = node.parentNode;
+          if (node === null) break;
+        }
+      }
+    }
+  }
+
+  return charCount;
+}
+
+function setCaretPositon(chars, element) {
+  if (chars >= 0) {
+    var selection = window.getSelection();
+
+    let range = createRange(element, { count: chars });
+
+    if (range) {
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+}
+
+function createRange(node, chars, range) {
+  if (!range) {
+    range = document.createRange()
+    range.selectNode(node);
+    range.setStart(node, 0);
+  }
+
+  if (chars.count === 0) {
+    range.setEnd(node, chars.count);
+  } else if (node && chars.count > 0) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      if (node.textContent.length < chars.count) {
+        chars.count -= node.textContent.length;
+      } else {
+        range.setEnd(node, chars.count);
+        chars.count = 0;
+      }
+    } else {
+      for (var lp = 0; lp < node.childNodes.length; lp++) {
+        range = createRange(node.childNodes[lp], chars, range);
+
+        if (chars.count === 0) break;
+      }
+    }
+  }
+
+  return range;
+}
+
+function isChild(node, parentElement) {
+  while (node !== null) {
+      if (node === parentElement) {
+          return true;
+      }
+      node = node.parentNode;
+  }
+
+  return false;
 }

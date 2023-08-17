@@ -279,10 +279,44 @@ CONSOLE SECTION
   text-decoration: underline;
 }
 
-/*FOOTER*/
+/*
+***********************************
+FOOTER SECTION
+***********************************
+*/
 
 footer {
   background-color: gray;
   text-align: center;
   padding: var(--footerPadding);
+}
+
+/*
+***********************************
+TOKEN COLOR SECTION
+***********************************
+*/
+
+.minprog {
+  color: rgb(255, 100, 100);
+}
+
+.dataType {
+  color: rgb(0, 195, 255);
+}
+
+.reservedWords {
+  color: rgb(0, 192, 182);
+}
+
+.numberLiteral {
+  color: #4ccaea;
+}
+
+.booleanLiteral{
+  color: red;
+}
+
+.textLiteral {
+  color: greenyellow;
 }
