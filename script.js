@@ -52,7 +52,7 @@ const tokenObjList = {
 loadSourceCode();
 loadTargetLang();
 fixLines();
-highlight(codeInput);
+highlight(tokenObjList, codeInput);
 loadResponse();
 if (consoleOpen) openConsole();
 
@@ -64,7 +64,6 @@ if (consoleOpen) openConsole();
 
 //Cada alteração que o usuário fizer no código, ajusto a contagem de linhas e guardo o código fonte no navegador
 codeInput.addEventListener("keydown", event => {
-  const key = event.keyCode;
   if (event.keyCode === 13) { //Enter
     appendLine();
   }
@@ -78,8 +77,13 @@ codeInput.addEventListener("keyup", event => {
   }
 
   delete userTyping[event.keyCode];
-  //Highligh só é aplicado se o user não está digitando
-  if (Object.keys(userTyping).length === 0) highlight(codeInput);
+
+
+  const keyBoolean = (event.keyCode < 37 || event.keyCode > 40) && event.keyCode !== 13; //Setas do teclado e Enter
+  console.log(keyBoolean);
+  console.log(event.ke);
+  //Highligh só é aplicado se o user não está digitando e digitou uma tecla válida
+  if (Object.keys(userTyping).length === 0 && keyBoolean) highlight(tokenObjList, codeInput);
 
   storeResource('sourceCode', codeInput.innerHTML);
 });
@@ -166,7 +170,7 @@ langButton.addEventListener("click", event => {
  ************************************************************************
 ************************************************************************/
 
-//É necessário adicionar ou remover elementos do flex conforme o usuário vai editando
+//É necessário adicionar ou remover elementos do flex com a contagem de linhas conforme o usuário vai editando
 function fixLines() {
   //input é salvo com div para separar as linhas
   const codeString = codeInput.innerHTML.replace(/<div>/g, '\n');
@@ -195,7 +199,7 @@ function fixLines() {
   lineCount = lines;
 }
 
-//Crio um item na minha listagem com a quantidade de linhas e adiciono no flex
+//Crio um item na minha listagem com a quantidade de linhas e adiciono no flex com a contagem de linhas
 function appendLine() {
   lineCount++;
   var li = document.createElement("li");
@@ -204,6 +208,7 @@ function appendLine() {
   lineCounter.appendChild(li);
 }
 
+//Muda a linguagem alvo que será solicitada para o compilador no servidor
 function changeLanguage(lang) {
   const langSelected = document.querySelector('#langSelected');
   const langText     = document.querySelector('#' + lang);
@@ -259,7 +264,8 @@ function closeConsole() {
 }
 
 /**NOME DAS CLASSES NAO PODE SER IGUAL A NENHUM TOKEN */
-function highlight(codeHolder) {
+//Aplica o highight no código do elemento passado como parametro de acordo com os tokens definidos no primeiro objeto
+function highlight(tokenObjList, codeHolder) {
   let codeString = codeHolder.innerHTML;
 
   const caretPos = getCaretPosition(codeHolder);
@@ -274,6 +280,7 @@ function highlight(codeHolder) {
   setCaretPositon(caretPos, codeHolder);
 }
 
+//Utiliza a regex para trocar matches de tokens no código fonte
 function color(code, TOKENLIST, tokenClass) {
   TOKENLIST.forEach((token) => {
     //pequeno hardcode para algumas classes de token especificas serem aceitas com alguns caracteres a mais, i.e. escreva()
@@ -305,11 +312,13 @@ function color(code, TOKENLIST, tokenClass) {
   return code;
 }
 
+//Simplesmente remove todas as marcações de span do código fonte para que fiquem sem cores personalizadas
 function decolor(code) {
     re = new RegExp("<span[^>]*>|<\\/span>", "gm");
     return code.replace(re, '');
 }
 
+//Encontra a posição do 'cursor de texto' no código fonte
 function getCaretPosition(element) {
   var selection = window.getSelection(),
     charCount = -1,
@@ -336,6 +345,7 @@ function getCaretPosition(element) {
   return charCount;
 }
 
+//Ajusta a posição do caret, necessário após ser feito o highlight pois o caret volta ao começo do código
 function setCaretPositon(chars, element) {
   if (chars >= 0) {
     var selection = window.getSelection();
