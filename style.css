@@ -20,7 +20,7 @@
 }
 
 body {
-  background-color: black;
+  background-color: rgb(10, 10, 10);
   color: white;
   font-family: 'Courier New', Courier, monospace;
   font-size: 12pt;
@@ -164,7 +164,7 @@ INPUT SECTION
 }
 
 .codeBox {
-  background-color: black;
+  background-color: rgb(10, 10, 10);
   display: flex;
   flex-grow: 1;
   max-height: 90vh;
@@ -172,7 +172,7 @@ INPUT SECTION
 }
 
 .lineCounter {
-  background-color: black;
+  background-color: rgb(10, 10, 10);
   border-right: 1px solid white;
   border-left: 1px solid white;
   display: inline-flex;
@@ -198,11 +198,12 @@ li {
   
   flex-grow: 1;
 
-  background-color: black;
+  background-color: rgb(10, 10, 10);
   font-family: inherit;
   font-size: inherit;
   caret-color: white;
   overflow: visible;
+  white-space: pre;
 }
 
 /*

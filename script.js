@@ -12,6 +12,7 @@ const consoleOpen    = loadResource('consoleOpen') || false;
 let fetchURL         = "https://glyphobe-production.up.railway.app/compile";
 let lineCount        = 1;
 let targetLang       = 'js';
+let userTyping       = {};
 
 /**SYNTAX HIGHLIGH PURPOSES */
 const tokenObjList = {
@@ -48,8 +49,6 @@ const tokenObjList = {
  * MAIN
  ************************************************************************
 ************************************************************************/
-ra = new RegExp(`(?<=\\s)INTEIRO(?=\\s)`, 'g');
-console.log(ra.exec("     <span> INTEIRO </span> "));
 loadSourceCode();
 loadTargetLang();
 fixLines();
@@ -65,18 +64,23 @@ if (consoleOpen) openConsole();
 
 //Cada alteração que o usuário fizer no código, ajusto a contagem de linhas e guardo o código fonte no navegador
 codeInput.addEventListener("keydown", event => {
+  const key = event.keyCode;
   if (event.keyCode === 13) { //Enter
     appendLine();
   }
+  if (!userTyping[event.keyCode]) userTyping[event.keyCode] = true;
   storeResource('sourceCode', codeInput.innerHTML);
 });
 
 codeInput.addEventListener("keyup", event => {
   if (event.keyCode === 8) { //Backspace
     fixLines();
-  } else if (event.keyCode === 13) { //Enter
   }
-  highlight(codeInput);
+
+  delete userTyping[event.keyCode];
+  //Highligh só é aplicado se o user não está digitando
+  if (Object.keys(userTyping).length === 0) highlight(codeInput);
+
   storeResource('sourceCode', codeInput.innerHTML);
 });
 
@@ -84,9 +88,8 @@ codeInput.addEventListener("keyup", event => {
 playButton.addEventListener("click", async function(event) {  
   consoleContent.innerHTML = 'Loading';
 
-  const code = codeInput.innerHTML
-    .replace(/<div>/gm, "\n")
-    .replace(/(<\/div>)?(<br>)?/gm, "")
+  const code = codeInput.innerText
+    .replace(/ /gm, " ") //Por algum motivo innerText tras esse espaço estranho
   ;
 
   try {
@@ -292,8 +295,11 @@ function color(code, TOKENLIST, tokenClass) {
       tokenClass === "numberLiteral"  |
       tokenClass === "booleanLiteral"
     ) ? '(?=[\\.\\,])|' : '' ;
+    const empty = (
+      tokenClass === "minprog"
+    ) ? '(?=)|(?=<div>)|' : '' ;
 
-    re = new RegExp(`(${parenthesis1.replace("?", "?<")}(?<=\\s)|(?<=<div>)|(?<=&nbsp;))(${token})(${parenthesis1 + parenthesis2 + dotcomma}(?=\\s)|(?=<\\/div>)|(?=&nbsp;))`, "gm");
+    re = new RegExp(`(${parenthesis1.replace("?", "?<") + empty.replace("?", "?<")}(?<=\\s)|(?<=<div>)|(?<=&nbsp;))(${token})(${parenthesis1 + parenthesis2 + dotcomma + empty}(?=\\s)|(?=<\\/div>)|(?=&nbsp;))`, "gm");
     code = code.replace(re, `<span class="${tokenClass}">$2</span>`);
   });
   return code;
@@ -307,7 +313,8 @@ function decolor(code) {
 function getCaretPosition(element) {
   var selection = window.getSelection(),
     charCount = -1,
-    node;
+    node
+  ;
 
   if (selection.focusNode) {
     if (isChild(selection.focusNode, element)) {
@@ -322,12 +329,10 @@ function getCaretPosition(element) {
           charCount += node.textContent.length;
         } else {
           node = node.parentNode;
-          if (node === null) break;
         }
       }
     }
   }
-
   return charCount;
 }
 
@@ -363,8 +368,8 @@ function createRange(node, chars, range) {
         chars.count = 0;
       }
     } else {
-      for (var lp = 0; lp < node.childNodes.length; lp++) {
-        range = createRange(node.childNodes[lp], chars, range);
+      for (var i = 0; i <= node.childNodes.length; i++) {
+        range = createRange(node.childNodes[i], chars, range);
 
         if (chars.count === 0) break;
       }
