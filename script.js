@@ -80,8 +80,6 @@ codeInput.addEventListener("keyup", event => {
 
 
   const keyBoolean = (event.keyCode < 37 || event.keyCode > 40) && event.keyCode !== 13; //Setas do teclado e Enter
-  console.log(keyBoolean);
-  console.log(event.ke);
   //Highligh só é aplicado se o user não está digitando e digitou uma tecla válida
   if (Object.keys(userTyping).length === 0 && keyBoolean) highlight(tokenObjList, codeInput);
 
@@ -176,7 +174,7 @@ function fixLines() {
   const codeString = codeInput.innerHTML.replace(/<div>/g, '\n');
 
   var lines = 1;
-  if (codeString.charAt(0) === '\n') lines--; //Para não contar linha a mais
+  for (let i = 0; codeString.charAt(i) === '\n' ; i++) lines--; //Para não contar linha a mais
 
   //Conto quantas quebras de linha há no código fonte
   for (var i = 0; i < codeString.length; i++) {
@@ -314,8 +312,11 @@ function color(code, TOKENLIST, tokenClass) {
 
 //Simplesmente remove todas as marcações de span do código fonte para que fiquem sem cores personalizadas
 function decolor(code) {
-    re = new RegExp("<span[^>]*>|<\\/span>", "gm");
-    return code.replace(re, '');
+  //Regex para limpar o código. As vezes quando código é colado de outro lugar na div, os navegadores colocam divs com estilo ou tags de font que devem ser limpadas nesse momento
+  const re = new RegExp("(<span[^>]*>|<\\/span>)", "gm");
+  const font = new RegExp("(<font[^>]*>|<\\/font>)", "gm");
+  const divStyle = new RegExp("<div[^>]+>", "gm");
+  return code.replace(divStyle, '<div>').replace(font, '').replace(re, '');
 }
 
 //Encontra a posição do 'cursor de texto' no código fonte

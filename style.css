@@ -191,7 +191,7 @@ li {
 }
 
 .codeInput {
-  display: inline;
+  display: inline-block;
   height: 100%;
   line-height: var(--codeLineHeight);
   padding-left: 1px;
