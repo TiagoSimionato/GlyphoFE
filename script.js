@@ -9,7 +9,7 @@ const consoleContent = document.querySelector('.consoleContent');
 const consoleClose   = document.querySelector('.consoleClose');
 const sourceCode     = loadResource('sourceCode')  || '';
 const consoleOpen    = loadResource('consoleOpen') || false;
-let fetchURL         = "https://glyphobe-production.up.railway.app/compile";
+let fetchURL         = "https://glyphobe.onrender.com/compile";
 let lineCount        = 1;
 let targetLang       = 'js';
 let userTyping       = {};
@@ -139,7 +139,7 @@ consoleClose.addEventListener("click", event => {
 body.addEventListener("keydown", event => {
   if (event.target.className !== "codeInput" && event.keyCode === 110) {
     if (fetchURL.match(/localhost/g)) {
-      fetchURL = "https://glyphobe-production.up.railway.app/compile";
+      fetchURL = "https://glyphobe.onrender.com/compile";
     } else {
       fetchURL = "http://localhost:8080/compile";
     }
